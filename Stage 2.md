@@ -16,3 +16,22 @@ For this stage we are only interested in one thing from the environment the PATH
 The key point for this stageis to choose an appropriate variant of exec() that will take into  account  the  PATH  environment  parameter.  Read  also  the  manual  very  carefully about how to handle external program parameters.Remember that we should be able to support any number of command parameters.
 
 Do  not  also  forget  to  handle  the  situation  where  an  invalid  program  was  entered,  in which case you should provide the user with an appropriate error message
+
+## Parsing simplification
+
+In order to simplify the parsing so that built-in commands canbe easily added, it is a good idea to generate a single string array that includes all the tokens of the user input line.  This  way  you  can  parse  the  user  input 
+line,  in  the  same  way,all  the  time irrespective  of  whether  it  contains  built-in  or  external  commands  or  the  number  of tokens it contains!
+
+To make your life even easier you can use a fixed size array, thus putting a limit on the number of tokens accepted. Fifty tokens will be a reasonable number here.
+
+# Stage 2: Testing
+
+First, test that  the  code  you  have  added  to  your  shell  has  not  broken  the  previously working code (i.e. repeat the same tests that you carried out for stage 1). They should still work. In software engineering,this is referred to as regression testing.
+
+To test that the new functionality in yourshell works you should invoke a number of programs (system or otherwise) and see them execute. 
+
+In order to check that you are handling correctly any number of parameters a very good system program to use is ‘ls’ which provides a list of the contents of a directory. The good thing about itis that it takesa number of flags that change the formatting of the output and it can also take a list of directory/files (of any length) and list their contents or them.
+
+You  can  check  whether  your  program  correctly  handles  paths  (i.e.  only  looks  for executables in the directories specified by the path) by invoking your shell from within your shell! Typically the current directory (i.e. ‘.’) is in the path so you should be able to do this if you are running your shell from the directory the executable resides in, but not from anotherdirectory (e.g. MyShell/shell and then type ‘shell’at the prompt).
+
+Do not forget to check what happens when an invalid program is provided by the user
