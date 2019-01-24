@@ -19,7 +19,7 @@ Parsing the input line involves breaking it into parts(tokens)based on white spa
 
 Your  shell  should  continuously  be  prompting  the  user  for  input  and  reading  and processing  any  user inputuntil the user types ‘exit’ (strcmp()  function  can  be  handy here) or‘<ctrl>-D’(both  are  required).  Note  that  in  the  latter  case,  we  are  in  fact closing the standard input, which will give an error when trying to read from it. So, you need to use this as a way of exiting the loop.
 
-## Stage 1: Testing
+# Stage 1: Testing
 
 To test that your shell works correctly you should be able to prompt the user to enter a line of input and then print the list of tokens one at a time. It is probably a good idea to put each printed token in a single line and encloseitwithina particular pair of characters(e.g. quotations)in order to be certain about the characters included in the token.
 
