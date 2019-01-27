@@ -21,7 +21,7 @@ Your  shell  should  continuously  be  prompting  the  user  for  input  and  re
 
 # Stage 1: Testing
 
-To test that your shell works correctly you should be able to prompt the user to enter a line of input and then print the list of tokens one at a time. It is probably a good idea to put each printed token in a single line and encloseitwithina particular pair of characters(e.g. quotations)in order to be certain about the characters included in the token.
+To test that your shell works correctly you should be able to prompt the user to enter a line of input and then print the list of tokens one at a time. It is probably a good idea to put each printed token in a single line and enclose it within a particular pair of characters(e.g. quotations)in order to be certain about the characters included in the token.
 
 Remember to test your code extensively, i.e. with as many words as possible. Don’t forget to also test what happens when you exceed the character limitor when the line is empty (i.e. just enter typed in, by the way in this case there are no tokens). In general,you should ensure that your program works correctly no matter what the user types in. This is very important for a shell as it should never crash.
 
