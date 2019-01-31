@@ -17,7 +17,7 @@ Parsing the input line involves breaking it into parts(tokens)based on white spa
 
 ## Continuous reading and processing of user input and exiting the shell
 
-Your  shell  should  continuously  be  prompting  the  user  for  input  and  reading  and processing  any  user inputuntil the user types ‘exit’ (strcmp()  function  can  be  handy here) or‘<ctrl>-D’(both  are  required).  Note  that  in  the  latter  case,  we  are  in  fact closing the standard input, which will give an error when trying to read from it. So, you need to use this as a way of exiting the loop.
+Your  shell  should  continuously  be  prompting  the  user  for  input  and  reading  and processing  any  user inputuntil the user types ‘exit’ (strcmp()  function  can  be  handy here) or‘CTRL-D’(both  are  required).  Note  that  in  the  latter  case,  we  are  in  fact closing the standard input, which will give an error when trying to read from it. So, you need to use this as a way of exiting the loop.
 
 # Stage 1: Testing
 
