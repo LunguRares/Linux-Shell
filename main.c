@@ -14,6 +14,7 @@
 typedef struct{
     int tokenNumber;
     char tokens[NUMBEROFTOKENS][SIZEOFTOKENS];
+    char command[MAXBUFFSIZE];
 }TokenList;
 
 void loop();
@@ -73,6 +74,8 @@ TokenList get_input(){
         input[index] = c;
         index++;
     }while(index<MAXBUFFSIZE && !(c==EOF && index==1) && c!='\n');
+    
+    strcpy(Toekens.command,input);
 
     if(c==EOF && index==1){
         strcpy(Tokens.tokens[Tokens.tokenNumber],"exit");
