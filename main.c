@@ -99,18 +99,19 @@ TokenList get_input(){
 */
 int execute(TokenList *Tokens){
 
-    if((*Tokens).tokenNumber==0)    //If no comments then just return 1
+    if(Tokens->tokenNumber==0)    //If no comments then just return 1
         return 1;
 
     //Uncomment this for testing (Prints the number of tokens and then each token on a separate line)
 
-    printf("%d\n",(*Tokens).tokenNumber);
-    for(int i=0;i<(*Tokens).tokenNumber;i++)
-        printf("'%s'\n",(*Tokens).tokens[i]);
+    printf("%d\n",Tokens->tokenNumber);
+    for(int i=0;i<Tokens->tokenNumber;i++)
+        printf("'%s'\n",Tokens->tokens[i]);
 
 
-    if(strcmp((*Tokens).tokens[0],"exit")==0)     //The user entered an exit command, return 0 to terminate the shell loop
+    if(strcmp(Tokens->tokens[0],"exit")==0)     //The user entered an exit command, return 0 to terminate the shell loop
         return 0;
+
 
     printf("Command not found \n");
     return 1;
