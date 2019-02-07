@@ -18,7 +18,7 @@ typedef struct{
 
 void loop();
 void display_prompt();
-TokenList* get_input();
+TokenList get_input();
 int execute(TokenList *Tokens);
 
 int main()
@@ -39,12 +39,12 @@ int main()
 */
 void loop(){
     int status;
-    TokenList *Tokens;
+    TokenList Tokens;
 
     do{
         display_prompt();
         Tokens = get_input();
-        status = execute(Tokens);
+        status = execute(&Tokens);
     }while(status);
 }
 
@@ -60,7 +60,7 @@ void display_prompt(){
 *    Reads user input from the keyboard and parses it into tokens
 *    Return Value: List of tokens and the number of tokens
 */
-TokenList* get_input(){
+TokenList get_input(){
 
     char input[MAXBUFFSIZE] = {};
     char c;
@@ -77,7 +77,7 @@ TokenList* get_input(){
     if(c==EOF && index==1){
         strcpy(Tokens.tokens[Tokens.tokenNumber],"exit");
         Tokens.tokenNumber++;
-        return &Tokens;
+        return Tokens;
     }
 
 
@@ -88,7 +88,7 @@ TokenList* get_input(){
         pointer = strtok (NULL, DELIMITERS);
     }
 
-    return &Tokens;
+    return Tokens;
 }
 
 /*
@@ -103,11 +103,11 @@ int execute(TokenList *Tokens){
         return 1;
 
     //Uncomment this for testing (Prints the number of tokens and then each token on a separate line)
-/*
+
     printf("%d\n",(*Tokens).tokenNumber);
     for(int i=0;i<(*Tokens).tokenNumber;i++)
-        printf("'%s\n'",(*Tokens).tokens[i]);
-*/
+        printf("'%s'\n",(*Tokens).tokens[i]);
+
 
     if(strcmp((*Tokens).tokens[0],"exit")==0)     //The user entered an exit command, return 0 to terminate the shell loop
         return 0;
