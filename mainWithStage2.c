@@ -156,9 +156,9 @@ ptr[(Tokens->tokenNumber)+1]='\0';
 
 
 //Incase of Error uncomment to print filename, path and argument to check correct combination
-
+/*
 printf("%s \n%s \n", filepath, fullpath);
-
+*/
 
    pid_t  pid; 
    int ret = 1; 
