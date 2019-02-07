@@ -75,7 +75,7 @@ TokenList get_input(){
         index++;
     }while(index<MAXBUFFSIZE && !(c==EOF && index==1) && c!='\n');
     
-    strcpy(Toekens.command,input);
+    strcpy(Tokens.command,input);
 
     if(c==EOF && index==1){
         strcpy(Tokens.tokens[Tokens.tokenNumber],"exit");
