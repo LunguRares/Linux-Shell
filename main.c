@@ -20,7 +20,7 @@ typedef struct{
 void loop();
 void display_prompt();
 void get_input(char input[MAXBUFFSIZE]);
-int execute(char* input);
+int execute(char input[MAXBUFFSIZE]);
 void tokenize(TokenList* Tokens);
 
 int main()
@@ -88,7 +88,7 @@ void get_input(char input[MAXBUFFSIZE]){
 *    Return Value: - 0 = the shell is still running
 *                  - 1 = exit the shelll
 */
-int execute(char* input){
+int execute(char input[MAXBUFFSIZE]){
 
     TokenList Tokens = {0};
     strcpy(Tokens.command,input);       //Saves the input in the command in case a functions needs the full command line from the user. Also useful for error checking 
