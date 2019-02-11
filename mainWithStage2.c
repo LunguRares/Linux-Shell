@@ -25,10 +25,9 @@ typedef struct{
 
 void loop();
 void display_prompt();
-TokenList get_input();
-int execute(TokenList *Tokens);
-
-
+void get_input(char input[MAXBUFFSIZE]);
+int execute(char input[MAXBUFFSIZE]);
+void tokenize(TokenList* Tokens);
 int callExternal(char *,TokenList *Tokens);
 
 int main()
@@ -49,15 +48,14 @@ int main()
 */
 void loop(){
     int status;
-    TokenList Tokens;
 
     do{
+        char input[MAXBUFFSIZE] = {};
         display_prompt();
-        Tokens = get_input();
-        status = execute(&Tokens);
+        get_input(input);
+        status = execute(input);
     }while(status);
 }
-
 
 
 /*
@@ -68,78 +66,84 @@ void display_prompt(){
 }
 
 /*
-*    Reads user input from the keyboard and parses it into tokens
+*    Reads user input from the keyboard
 *    Return Value: List of tokens and the number of tokens
 */
-TokenList get_input(){
+void get_input(char input[MAXBUFFSIZE]){
 
-    char input[MAXBUFFSIZE] = {};
     char c;
     int index = 0;
-    TokenList Tokens = {0};
-    char* pointer;
 
     do{
         c = getchar();
         input[index] = c;
         index++;
     }while(index<MAXBUFFSIZE && !(c==EOF && index==1) && c!='\n');
-    
-    strcpy(Tokens.command,input);
 
     if(c==EOF && index==1){
-        strcpy(Tokens.tokens[Tokens.tokenNumber],"exit");
-        Tokens.tokenNumber++;
-        return Tokens;
+        input[0] = 'e';
+        input[1] = 'x';
+        input[2] = 'i';
+        input[3] = 't';
     }
 
-
-    pointer = strtok (input,DELIMITERS);
-    while (pointer != NULL){
-        strcpy(Tokens.tokens[Tokens.tokenNumber],pointer);
-        Tokens.tokenNumber++;
-        pointer = strtok (NULL, DELIMITERS);
-    }
-
-    return Tokens;
 }
 
-
 /*
-*    Executes commands based on the tokens
+*    Tokenizes the input command and executes commands based on the tokens
 *    Parameter: Structure containing an integer representing the number of Tokens and an array of Tokens
 *    Return Value: - 0 = the shell is still running
 *                  - 1 = exit the shelll
 */
-int execute(TokenList *Tokens){
+int execute(char input[MAXBUFFSIZE]){
 
-    if(Tokens->tokenNumber==0)    //If no comments then just return 1
+    TokenList Tokens = {0};
+    strcpy(Tokens.command,input);       //Saves the input in the command in case a functions needs the full command line from the user. Also useful for error checking 
+
+    tokenize(&Tokens);          //Breaks the command into tokens 
+
+    if(Tokens.tokenNumber==0)    //If no comments then just return 1
         return 1;
 
+
     //Uncomment this for testing (Prints the number of tokens and then each token on a separate line)
+/*
+    printf("%d\n",Tokens.tokenNumber);
+    for(int i=0;i<Tokens.tokenNumber;i++)
+        printf("'%s'\n",Tokens.tokens[i]);
+*/
 
-    printf("%d\n",Tokens->tokenNumber);
-    for(int i=0;i<Tokens->tokenNumber;i++)
-        printf("'%s'\n",Tokens->tokens[i]);
-
-     if(strcmp(Tokens->tokens[0],"exit")==0)     //The user entered an exit command, return 0 to terminate the shell loop
+     if(strcmp(Tokens.tokens[0],"exit")==0)     //The user entered an exit command, return 0 to terminate the shell loop
         return 0;
 
 //filepath here needs to be set inside the program, will be given by another part of the program
 
 	char *filepath={"/home/cgb17145/Documents/Study/"};
-	if(!callExternal(filepath, Tokens))
+	if(!callExternal(filepath, &Tokens))
 		return 1;
 	
-
-    printf("Command not found \n");
+ printf("Command not found \n");
     return 1;
 }
+
+void tokenize(TokenList* Tokens){
+
+char* pointer;
+
+pointer = strtok (Tokens->command,DELIMITERS);
+    while (pointer != NULL){
+        strcpy(Tokens->tokens[Tokens->tokenNumber],pointer);
+        Tokens->tokenNumber++;
+        pointer = strtok (NULL, DELIMITERS);
+    }
+
+}
+
 
 //Call External Function
 //Function takes in two strings, filename and filepath, and then forks, creates a child process, this process executes the specified file adn returns, there is a variety of error handling to deal with incorrect input or errors in the system.
 
-int callExternal(char *filepath, TokenList *Tokens){ 
+int callExternal(char *filepath, TokenList* Tokens){ 
 
 char fullpath[80];
 strcpy(fullpath,filepath);
