@@ -144,7 +144,7 @@ int execute(char input[MAXBUFFSIZE]){
     if(strcmp(Tokens.tokens[0],"exit")==0)     //The user entered an exit command, return 0 to terminate the shell loop
         return 0;
 
-///////problem here. setpath and getpath only work if they are first. right now setpath first so it works///
+///////problem here. setpath and getpath only work if they are first. right now setpath first so setpath works but getpath doesnt///
 if(strcmp(Tokens.tokens[0],"setpath")==0)
 
 	setpath(Tokens.tokens[1]);
