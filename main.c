@@ -22,8 +22,9 @@ void display_prompt();
 void get_input(char input[MAXBUFFSIZE]);
 int execute(char input[MAXBUFFSIZE]);
 void tokenize(TokenList* Tokens);
-int noTokens(TokenList* Tokens);
-int exitCommand(TokenList* Tokens);
+int getCommandID(TokenList* Tokens);
+int checkNoTokens(TokenList* Tokens);
+int checkExitCommand(TokenList* Tokens);
 
 int main()
 {
@@ -96,9 +97,6 @@ int execute(char input[MAXBUFFSIZE]){
     strcpy(Tokens.command,input);       //Saves the input in the command in case a functions needs the full command line from the user. Also useful for error checking
     tokenize(&Tokens);                  //Breaks the command into tokens
 
-    if(noTokens(&Tokens))    //If no argumnts then just return 1
-        return 1;
-
     //Uncomment this for testing (Prints the number of tokens and then each token on a separate line)
 /*
     printf("%d\n",Tokens.tokenNumber);
@@ -106,11 +104,23 @@ int execute(char input[MAXBUFFSIZE]){
         printf("'%s'\n",Tokens.tokens[i]);
 */
 
-    if(exitCommand(&Tokens))
-        return 0;
+    int cmdID = getCommandID(&Tokens);
 
-    printf("Command not found \n");
-    return 1;
+    switch(cmdID){
+        case 0:
+            return 1;
+
+        case 1:
+            return 0;
+
+        default: {
+            printf("Command not found \n");
+            return 1;
+        }
+    }
+
+
+
 }
 
 void tokenize(TokenList* Tokens){
@@ -126,16 +136,25 @@ void tokenize(TokenList* Tokens){
 
 }
 
-int noTokens(TokenList* Tokens){
+int checkNoTokens(TokenList* Tokens){
     if(Tokens->tokenNumber==0)
         return 1;
     else
         return 0;
 }
 
-int exitCommand(TokenList* Tokens){
+int checkExitCommand(TokenList* Tokens){
     if(strcmp(Tokens->tokens[0],"exit")==0)     //The user entered an exit command, return 0 to terminate the shell loop
         return 1;
     else
         return 0;
+}
+
+int getCommandID(TokenList* Tokens){
+
+    if(checkNoTokens(Tokens))
+        return 0;
+    if(checkExitCommand(Tokens))
+        return 1;
+    return 100;
 }
