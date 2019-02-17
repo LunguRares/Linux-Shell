@@ -22,6 +22,8 @@ void display_prompt();
 void get_input(char input[MAXBUFFSIZE]);
 int execute(char input[MAXBUFFSIZE]);
 void tokenize(TokenList* Tokens);
+int noTokens(TokenList* Tokens);
+int exitCommand(TokenList* Tokens);
 
 int main()
 {
@@ -91,13 +93,11 @@ void get_input(char input[MAXBUFFSIZE]){
 int execute(char input[MAXBUFFSIZE]){
 
     TokenList Tokens = {0};
-    strcpy(Tokens.command,input);       //Saves the input in the command in case a functions needs the full command line from the user. Also useful for error checking 
+    strcpy(Tokens.command,input);       //Saves the input in the command in case a functions needs the full command line from the user. Also useful for error checking
+    tokenize(&Tokens);                  //Breaks the command into tokens
 
-    tokenize(&Tokens);          //Breaks the command into tokens 
-
-    if(Tokens.tokenNumber==0)    //If no comments then just return 1
+    if(noTokens(&Tokens))    //If no argumnts then just return 1
         return 1;
-
 
     //Uncomment this for testing (Prints the number of tokens and then each token on a separate line)
 /*
@@ -106,9 +106,8 @@ int execute(char input[MAXBUFFSIZE]){
         printf("'%s'\n",Tokens.tokens[i]);
 */
 
-    if(strcmp(Tokens.tokens[0],"exit")==0)     //The user entered an exit command, return 0 to terminate the shell loop
+    if(exitCommand(&Tokens))
         return 0;
-
 
     printf("Command not found \n");
     return 1;
@@ -116,13 +115,27 @@ int execute(char input[MAXBUFFSIZE]){
 
 void tokenize(TokenList* Tokens){
 
-char* pointer;
+    char* pointer;
 
-pointer = strtok (Tokens->command,DELIMITERS);
-    while (pointer != NULL){
-        strcpy(Tokens->tokens[Tokens->tokenNumber],pointer);
-        Tokens->tokenNumber++;
-        pointer = strtok (NULL, DELIMITERS);
-    }
+    pointer = strtok (Tokens->command,DELIMITERS);
+        while (pointer != NULL){
+            strcpy(Tokens->tokens[Tokens->tokenNumber],pointer);
+            Tokens->tokenNumber++;
+            pointer = strtok (NULL, DELIMITERS);
+        }
 
+}
+
+int noTokens(TokenList* Tokens){
+    if(Tokens->tokenNumber==0)
+        return 1;
+    else
+        return 0;
+}
+
+int exitCommand(TokenList* Tokens){
+    if(strcmp(Tokens->tokens[0],"exit")==0)     //The user entered an exit command, return 0 to terminate the shell loop
+        return 1;
+    else
+        return 0;
 }
