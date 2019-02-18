@@ -28,7 +28,7 @@ void display_prompt();
 void get_input(char input[MAXBUFFSIZE]);
 int execute(char input[MAXBUFFSIZE]);
 void tokenize(TokenList* Tokens);
-int callExternal(char *,TokenList *Tokens);
+int callExternal(TokenList *Tokens);
 
 int main()
 {
@@ -117,9 +117,7 @@ int execute(char input[MAXBUFFSIZE]){
         return 0;
 
 //filepath here needs to be set inside the program, will be given by another part of the program
-
-	char *filepath={"/home/cgb17145/Documents/Study/"};
-	if(!callExternal(filepath, &Tokens))
+	if(!callExternal( &Tokens))
 		return 1;
 	
  printf("Command not found \n");
@@ -143,25 +141,25 @@ pointer = strtok (Tokens->command,DELIMITERS);
 //Call External Function
 //Function takes in two strings, filename and filepath, and then forks, creates a child process, this process executes the specified file adn returns, there is a variety of error handling to deal with incorrect input or errors in the system.
 
-int callExternal(char *filepath, TokenList* Tokens){ 
+int callExternal(TokenList* Tokens){ 
 
-char fullpath[80];
-strcpy(fullpath,filepath);
-strcat(fullpath,Tokens->tokens[0]);
-
-char *args[Tokens->tokenNumber+1];
+char *args[Tokens->tokenNumber];
 char **ptr=args;
 
 for ( int i=0;i<(Tokens->tokenNumber);i++){
 	ptr[i]=Tokens->tokens[i];
 }
 
-ptr[(Tokens->tokenNumber)+1]='\0';
+ptr[(Tokens->tokenNumber)]='\0';
 
-
-//Incase of Error uncomment to print filename, path and argument to check correct combination
+// uncomment below incase of error found in parrameters passed between tokens and arguments
 /*
-printf("%s \n%s \n", filepath, fullpath);
+for ( int i=0;i<(Tokens->tokenNumber);i++){
+	ptr[i]=Tokens->tokens[i];
+	printf("%s \n%s \n", args[i],Tokens->tokens[i]);
+}
+printf("%s \n", args[(Tokens->tokenNumber)+1]);
+printf("token number is %d \n", Tokens->tokenNumber);
 */
 
    pid_t  pid; 
@@ -176,7 +174,7 @@ printf("%s \n%s \n", filepath, fullpath);
    } 
    else if (pid == 0){ 
     
-        execvp(fullpath,args); 
+        execvp(Tokens->tokens[0],args); 
 
 	printf("Error 002: program failed wrong name supplied\n");
 	printf("arg[0]-%s  arg[1]-%s \n", args[0], args[1]);
