@@ -40,7 +40,7 @@ int main()
     /*SETUP*/
     char* path;
     char* home;
-    char cwd[PATH_MAX];
+    //char cwd[PATH_MAX];
 
     path = getenv("PATH");
     home = getenv("HOME");
