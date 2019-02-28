@@ -68,6 +68,7 @@ int main()
 
     /*CLEANING*/
     setenv("PATH",path,1);
+    printf("Restored PATH to %s\n",path);
     return 0;
 }
 
