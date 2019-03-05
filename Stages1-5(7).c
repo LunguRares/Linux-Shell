@@ -69,9 +69,11 @@ int is_history_empty(HistoryAndAliases* HistoryAliases);
 void save_history(HistoryAndAliases* HistoryAliases);
 void load_history(HistoryAndAliases* HistoryAliases);
 void displayAliases(HistoryAndAliases* HistoryAliases);
+void alias(TokenList* Tokens, HistoryAndAliases* HistoryAliases);
+void unalias(TokenList* Tokens, HistoryAndAliases* HistoryAliases);
 
 int noOfAliases(HistoryAndAliases* HistoryAliases);
-
+int aliasCanBeAdded(HistoryAndAliases* HistoryAliases, char* aliasName);
 int main()
 {
     /*SETUP*/
@@ -153,6 +155,7 @@ void get_input(char input[MAXBUFFSIZE],HistoryAndAliases* HistoryAliases){
     char* pointer;
     char inputCopy[MAXBUFFSIZE];
     strcpy(inputCopy, input);
+
     pointer = strtok(inputCopy, DELIMITERS);
 
     if(!((index == 1 && c == '\n') || (pointer == NULL) || (*pointer == '!'))) {
@@ -215,8 +218,11 @@ int execute(char input[MAXBUFFSIZE],HistoryAndAliases* HistoryAliases){
             displayAliases(HistoryAliases);
             return CONTINUE_RUNNING;
         case 10:
-
+            alias(&Tokens, HistoryAliases);
+            return CONTINUE_RUNNING;
         case 11:
+            //unalias(HistoryAliases);
+            //return CONTINUE_RUNNING;
 
 
         default: {
@@ -231,8 +237,10 @@ int execute(char input[MAXBUFFSIZE],HistoryAndAliases* HistoryAliases){
 void tokenize(TokenList* Tokens){
 
     char* pointer;
+    char commandCopy[MAXBUFFSIZE];
+    strcpy(commandCopy,Tokens->command);
 
-    pointer = strtok (Tokens->command,DELIMITERS);
+    pointer = strtok (commandCopy,DELIMITERS);
     while (pointer != NULL){
         strcpy(Tokens->tokens[Tokens->tokenNumber],pointer);
         Tokens->tokenNumber++;
@@ -669,11 +677,74 @@ void displayAliases(HistoryAndAliases* HistoryAliases){
         }
 }
 
+void alias(TokenList* Tokens, HistoryAndAliases* HistoryAliases){
+
+    if(Tokens->tokenNumber<3){
+        printf("Error: Incorrect number of arguments\n");
+        return;
+    }
+
+    if(strcmp(Tokens->tokens[1],"unalias")==0){
+        printf("That's a bad idea. I'm sorry, I'm not going to let you do that\n");
+        return;
+    }
+
+    int possibleLocation;
+    possibleLocation = aliasCanBeAdded(HistoryAliases,Tokens->tokens[1]);
+    if(possibleLocation!=-1){
+            strcpy(HistoryAliases->aliases[0][possibleLocation],Tokens->tokens[1]);
+
+            int parameterStart = 0;
+            int parameterStop=0;
+            while(parameterStop!=2){
+                if(strchr(DELIMITERS,Tokens->command[parameterStart])!=NULL){
+                    parameterStop++;
+                }
+                parameterStart++;
+            }
+            char letter = Tokens->command[parameterStart];
+            int index = 0;
+            char command[MAXBUFFSIZE];
+            while(letter!='\0'){
+                command[index] = letter;
+                index++;
+                letter = Tokens->command[parameterStart+index];
+            }
+            strcpy(HistoryAliases->aliases[1][possibleLocation],command);
+
+            printf("Alias successfully added\n");
+            return;
+    }else {
+        printf("Error: Max number of aliases reached. Couldn't add aliases. Unalias something first\n");
+        return;
+    }
+}
+
+void unalias(TokenList* Tokens, HistoryAndAliases* HistoryAliases){
+
+}
+
+
 int noOfAliases(HistoryAndAliases* HistoryAliases){
     int noOfAliases = 10;
     for(int i=0;i<MAX_NO_ALIASES;i++){
-        if(HistoryAliases->aliases[0][i][0]=='\000')
+        if(HistoryAliases->aliases[0][i][0]=='\0')
             noOfAliases--;
     }
     return noOfAliases;
 }
+
+int aliasCanBeAdded(HistoryAndAliases* HistoryAliases, char* aliasName){
+
+    for(int i=0;i<MAX_NO_ALIASES;i++){
+        if(HistoryAliases->aliases[0][i][0]=='\0')
+            return i;
+        if(strcmp(HistoryAliases->aliases[0][i],aliasName)==0){
+            printf("Warning: Previous alias will be overwritten\n");
+            return i;
+        }
+    }
+
+    return -1;
+}
+
