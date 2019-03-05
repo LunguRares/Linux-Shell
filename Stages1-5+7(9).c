@@ -48,7 +48,7 @@ int checkInvokeCommandNegative(TokenList* Tokens);
 int checkAliasCommand(TokenList* Tokens);
 int checkUnaliasCommand(TokenList* Tokens);
 int checkDisplayAliases(TokenList* Tokens);
-
+int checkAlias(TokenList* Tokens,HistoryAndAliases* HistoryAliases);
 
 int aliasOrExternalCommand(TokenList* Tokens);
 int getpath(TokenList* Tokens);
@@ -71,15 +71,17 @@ void load_history(HistoryAndAliases* HistoryAliases);
 void displayAliases(HistoryAndAliases* HistoryAliases);
 void alias(TokenList* Tokens, HistoryAndAliases* HistoryAliases);
 void unalias(TokenList* Tokens, HistoryAndAliases* HistoryAliases);
+int substituteAlias(TokenList* Tokens, HistoryAndAliases* HistoryAliases);
 
 int noOfAliases(HistoryAndAliases* HistoryAliases);
 int aliasCanBeAdded(HistoryAndAliases* HistoryAliases, char* aliasName);
+
 int main()
 {
     /*SETUP*/
     char* path;
     char* home;
-    HistoryAndAliases HistoryAliases = {0, {{0}}, {{{0}}}};
+    HistoryAndAliases HistoryAliases = {0, {{0}}, {{{0},{0}}}};
     //char cwd[PATH_MAX];
 
     path = getenv("PATH");
@@ -135,7 +137,7 @@ void display_prompt(){
  */
 void get_input(char input[MAXBUFFSIZE],HistoryAndAliases* HistoryAliases){
 
-    char c;
+    int c;
     int index = 0;
 
     do{
@@ -190,40 +192,44 @@ int execute(char input[MAXBUFFSIZE],HistoryAndAliases* HistoryAliases){
             return CONTINUE_RUNNING;
 
         case 1:
-            return 0;
+            return substituteAlias(&Tokens,HistoryAliases);
 
         case 2:
-            return getpath(&Tokens);
+            return 0;
 
         case 3:
-            return setpath(&Tokens);
+            return getpath(&Tokens);
 
         case 4:
-            return changeDirectory(&Tokens);
+            return setpath(&Tokens);
 
         case 5:
+            return changeDirectory(&Tokens);
+
+        case 6:
             print_history(HistoryAliases);
             return CONTINUE_RUNNING;
 
-        case 6:
+        case 7:
             return invoke_last_command(HistoryAliases);
 
-        case 7:
+        case 8:
             return invoke_command_number(Tokens.tokens[0],HistoryAliases);
 
-        case 8:
+        case 9:
             return invoke_command_negative(Tokens.tokens[0],HistoryAliases);
 
-        case 9:
+        case 10:
             displayAliases(HistoryAliases);
             return CONTINUE_RUNNING;
-        case 10:
+
+        case 11:
             alias(&Tokens, HistoryAliases);
             return CONTINUE_RUNNING;
-        case 11:
-            //unalias(HistoryAliases);
-            //return CONTINUE_RUNNING;
 
+        case 12:
+            unalias(&Tokens,HistoryAliases);
+            return CONTINUE_RUNNING;
 
         default: {
             return aliasOrExternalCommand(&Tokens);
@@ -339,32 +345,44 @@ int checkUnaliasCommand(TokenList* Tokens){
     return 0;
 }
 
+int checkAlias(TokenList* Tokens,HistoryAndAliases* HistoryAliases){
+    for(int i=0;i<MAX_NO_ALIASES;i++){
+        if(strcmp(Tokens->tokens[0],HistoryAliases->aliases[0][i])==0){
+            printf("Alias found. Substituting...\n");
+            return 1;
+        }
+    }
+    return 0;
+}
+
 int getCommandID(TokenList* Tokens,HistoryAndAliases* HistoryAliases){
 
     if(checkNoTokens(Tokens))
         return 0;
-    if(checkExitCommand(Tokens))
+    if(checkAlias(Tokens,HistoryAliases))
         return 1;
-    if(checkGetPath(Tokens))
+    if(checkExitCommand(Tokens))
         return 2;
-    if(checkSetPath(Tokens))
+    if(checkGetPath(Tokens))
         return 3;
-    if(checkChangeDirectory(Tokens))
+    if(checkSetPath(Tokens))
         return 4;
-    if(checkHistoryCommand(Tokens))
+    if(checkChangeDirectory(Tokens))
         return 5;
-    if(checkInvokeLastCommand(Tokens))
+    if(checkHistoryCommand(Tokens))
         return 6;
+    if(checkInvokeLastCommand(Tokens))
+        return 7;
     if(checkInvokeCommandNumber(Tokens))
         return 7;
     if(checkInvokeCommandNegative(Tokens))
-        return 8;
-    if(checkDisplayAliases(Tokens))
         return 9;
-    if(checkAliasCommand(Tokens))
+    if(checkDisplayAliases(Tokens))
         return 10;
-    if(checkUnaliasCommand(Tokens))
+    if(checkAliasCommand(Tokens))
         return 11;
+    if(checkUnaliasCommand(Tokens))
+        return 12;
 
 
     return 100;
@@ -671,7 +689,7 @@ void displayAliases(HistoryAndAliases* HistoryAliases){
     }
     int displayIndex = 1;
     for(int i=0;i<MAX_NO_ALIASES;i++)
-        if(HistoryAliases->aliases[0][i][0]!='\000'){
+        if(HistoryAliases->aliases[0][i][0]!='\0'){
             printf("%d. %s %s",displayIndex,HistoryAliases->aliases[0][i],HistoryAliases->aliases[1][i]);
             displayIndex++;
         }
@@ -710,6 +728,10 @@ void alias(TokenList* Tokens, HistoryAndAliases* HistoryAliases){
                 index++;
                 letter = Tokens->command[parameterStart+index];
             }
+            command[index+1] = '\0';
+            for(int i=index;i<MAXBUFFSIZE;i++){
+            command[i] = '\0';
+            }
             strcpy(HistoryAliases->aliases[1][possibleLocation],command);
 
             printf("Alias successfully added\n");
@@ -721,7 +743,39 @@ void alias(TokenList* Tokens, HistoryAndAliases* HistoryAliases){
 }
 
 void unalias(TokenList* Tokens, HistoryAndAliases* HistoryAliases){
+    if(Tokens->tokenNumber!=2){
+        printf("Error: Incorrect number of parameters\n");
+        return;
+    }
 
+    for(int i=0;i<MAX_NO_ALIASES;i++){
+        if(strcmp(Tokens->tokens[1],HistoryAliases->aliases[0][i])==0){
+            printf("Alias found. Unaliasing now...\n");
+            HistoryAliases->aliases[0][i][0] = '\0';
+            HistoryAliases->aliases[1][i][0] = '\0';
+            printf("Alias succesfully deleted\n");
+            return;
+        }
+    }
+
+    printf("Error: No alias found with provided name\n");
+}
+
+int substituteAlias(TokenList* Tokens, HistoryAndAliases* HistoryAliases){
+    char command[MAXBUFFSIZE] = {};
+    for(int i=0;i<MAX_NO_ALIASES;i++){
+        if(strcmp(Tokens->tokens[0],HistoryAliases->aliases[0][i])==0){
+            strcpy(command,HistoryAliases->aliases[1][i]);
+            break;
+        }
+    }
+    char* space = " ";
+    for(int i=1;i<Tokens->tokenNumber;i++){
+        strcat(command,space);
+        strcat(command,Tokens->tokens[i]);
+    }
+
+    return execute(command,HistoryAliases);
 }
 
 
