@@ -13,6 +13,7 @@
 #define SIZEOFHISTORY 20
 #define MAX_NO_ALIASES 10
 #define CONTINUE_RUNNING 1
+#define ALIAS_FILE "aliases.txt"
 //#define PATH_MAX 256
 
 /*
@@ -50,7 +51,7 @@ int checkUnaliasCommand(TokenList* Tokens);
 int checkDisplayAliases(TokenList* Tokens);
 int checkAlias(TokenList* Tokens,HistoryAndAliases* HistoryAliases);
 
-int aliasOrExternalCommand(TokenList* Tokens);
+int externalCommand(TokenList* Tokens);
 int getpath(TokenList* Tokens);
 int setpath(TokenList* Tokens);
 int changeDirectory(TokenList* Tokens);
@@ -72,6 +73,9 @@ void displayAliases(HistoryAndAliases* HistoryAliases);
 void alias(TokenList* Tokens, HistoryAndAliases* HistoryAliases);
 void unalias(TokenList* Tokens, HistoryAndAliases* HistoryAliases);
 int substituteAlias(TokenList* Tokens, HistoryAndAliases* HistoryAliases);
+void saveAliases(HistoryAndAliases* HistoryAliases);
+void loadAliases(HistoryAndAliases* HistoryAliases);
+
 
 int noOfAliases(HistoryAndAliases* HistoryAliases);
 int aliasCanBeAdded(HistoryAndAliases* HistoryAliases, char* aliasName);
@@ -99,10 +103,13 @@ int main()
     //getcwd(cwd,sizeof cwd);
     //printf("%s \n",cwd);
 
+    loadAliases(&HistoryAliases);
+
     /*Display prompt, Read, Parse, Repeat*/
     loop(&HistoryAliases);
 
     /*CLEANING*/
+    saveAliases(&HistoryAliases);
     setenv("PATH",path,1);
     printf("Restored the PATH to %s\n",path);
     return 0;
@@ -153,6 +160,12 @@ void get_input(char input[MAXBUFFSIZE],HistoryAndAliases* HistoryAliases){
         input[3] = 't';
         input[4] = '\0';
     }
+
+    input[511] = '\n';
+    input[512] = '\0';
+
+    if(index>=MAXBUFFSIZE)
+         while (getchar() != '\n' );
 
     char* pointer;
     char inputCopy[MAXBUFFSIZE];
@@ -232,7 +245,7 @@ int execute(char input[MAXBUFFSIZE],HistoryAndAliases* HistoryAliases){
             return CONTINUE_RUNNING;
 
         default: {
-            return aliasOrExternalCommand(&Tokens);
+            return externalCommand(&Tokens);
         }
     }
 
@@ -424,7 +437,7 @@ int setpath(TokenList* Tokens){
 
 }
 
-int aliasOrExternalCommand(TokenList* Tokens){
+int externalCommand(TokenList* Tokens){
 
     //check if command matches any of the aliases
     //if it does, do return execute(cmd), where cmd is the saved command for the alias
@@ -762,7 +775,7 @@ void unalias(TokenList* Tokens, HistoryAndAliases* HistoryAliases){
 }
 
 int substituteAlias(TokenList* Tokens, HistoryAndAliases* HistoryAliases){
-    char command[MAXBUFFSIZE] = {};
+    char command[MAXBUFFSIZE] = "";
     for(int i=0;i<MAX_NO_ALIASES;i++){
         if(strcmp(Tokens->tokens[0],HistoryAliases->aliases[0][i])==0){
             strcpy(command,HistoryAliases->aliases[1][i]);
@@ -776,6 +789,69 @@ int substituteAlias(TokenList* Tokens, HistoryAndAliases* HistoryAliases){
     }
 
     return execute(command,HistoryAliases);
+}
+
+void saveAliases(HistoryAndAliases* HistoryAliases){
+    FILE * fp;
+
+    fp = fopen(ALIAS_FILE,"w");
+    if(fp==NULL){
+        perror("Error while saving aliases");
+        return;
+    }
+
+    printf("Saving aliases...\n");
+
+    for(int i=0;i<MAX_NO_ALIASES;i++){
+        if(HistoryAliases->aliases[0][i][0]!='\0'){
+            fprintf(fp,"%s",HistoryAliases->aliases[0][i]);
+            fprintf(fp," ");
+            fprintf(fp,"%s",HistoryAliases->aliases[1][i]);
+        }
+    }
+    fclose(fp);
+    printf("Aliases successfully saved;\n");
+}
+
+void loadAliases(HistoryAndAliases* HistoryAndAliases){
+    FILE * fp;
+
+    fp = fopen(ALIAS_FILE,"r");
+    if(fp==NULL){
+        perror("Error while loading aliases");
+        return;
+    }
+
+    printf("Loading aliases...\n");
+
+    char line[MAXBUFFSIZE];
+    int aliasIndex = 0;
+    while(fgets(line,MAXBUFFSIZE,fp)!=NULL && aliasIndex<MAX_NO_ALIASES) {
+        char letter = line[0];
+        int aliasCharIndex = 0;
+        while(letter!=' '){
+            HistoryAndAliases->aliases[0][aliasIndex][aliasCharIndex] = letter;
+            aliasCharIndex++;
+            letter = line[aliasCharIndex];
+        }
+        HistoryAndAliases->aliases[0][aliasIndex][aliasCharIndex] = '\0';
+        aliasCharIndex++;
+
+        int commandIndex=0;
+        letter = line[aliasCharIndex+commandIndex];
+        while(letter!='\n' && letter!=EOF){
+            HistoryAndAliases->aliases[1][aliasIndex][commandIndex] = letter;
+            commandIndex++;
+            letter = line[aliasCharIndex+commandIndex];
+        }
+        HistoryAndAliases->aliases[1][aliasIndex][commandIndex] = '\n';
+        HistoryAndAliases->aliases[1][aliasIndex][commandIndex+1] = '\0';
+        aliasIndex++;
+    }
+
+    fclose(fp);
+    printf("Aliases successfully loaded;\n");
+
 }
 
 
@@ -801,4 +877,3 @@ int aliasCanBeAdded(HistoryAndAliases* HistoryAliases, char* aliasName){
 
     return -1;
 }
-
