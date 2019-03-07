@@ -387,7 +387,7 @@ int getCommandID(TokenList* Tokens,HistoryAndAliases* HistoryAliases){
     if(checkInvokeLastCommand(Tokens))
         return 7;
     if(checkInvokeCommandNumber(Tokens))
-        return 7;
+        return 8;
     if(checkInvokeCommandNegative(Tokens))
         return 9;
     if(checkDisplayAliases(Tokens))
