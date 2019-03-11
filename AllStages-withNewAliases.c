@@ -446,6 +446,15 @@ int setpath(TokenList* Tokens){
 
 }
 
+/*
+*If the program cannot recognise a given command, it forks and uses the execvp
+*to run the command, it treats the rest of the tokens as possible arguments to 
+*be passed to the external program
+*
+*/
+
+
+
 int externalCommand(TokenList* Tokens){
 
     char *args[Tokens->tokenNumber];
@@ -466,7 +475,7 @@ int externalCommand(TokenList* Tokens){
     }else {
         if(pid==0){
             if(execvp(*args,args)<0)
-                perror("Error");
+                perror("Error in external Call");
             exit(0);
         }else {
             wait(NULL);
