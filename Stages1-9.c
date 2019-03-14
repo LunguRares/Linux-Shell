@@ -14,7 +14,7 @@
 #define MAX_NO_ALIASES 10
 #define CONTINUE_RUNNING 1
 #define ALIAS_FILE ".aliases"
-#define HIST_FILE ".history"
+#define HIST_FILE ".hist_list"
 //#define PATH_MAX 256
 
 /*
@@ -110,11 +110,14 @@ int main()
     /*Display prompt, Read, Parse, Repeat*/
     loop(&HistoryAliases);
 
-    save_history(&HistoryAliases);
+
 
     /*CLEANING*/
+    chdir(getenv("HOME"));
+    save_history(&HistoryAliases);
     saveAliases(&HistoryAliases);
     setenv("PATH",path,1);
+    path = getenv("PATH");
     printf("Restored the PATH to %s\n",path);
     return 0;
 }
@@ -410,7 +413,7 @@ int getCommandID(TokenList* Tokens,HistoryAndAliases* HistoryAliases){
 int getpath(TokenList* Tokens){
 
     if(Tokens->tokenNumber!=1){
-        printf("Syntax error: Too many arguments;\n");
+        printf("Syntax error: getpath expects no parameters;\n");
         return 1;
     } else {
         char* path;
@@ -428,7 +431,7 @@ int getpath(TokenList* Tokens){
 int setpath(TokenList* Tokens){
 
     if(Tokens->tokenNumber!=2){
-        printf("Syntax error: Incorect number of arguments;\n");
+        printf("Syntax error: setpath expects one parameter;\n");
         return 1;
     } else {
         if(setenv("PATH",Tokens->tokens[1],1)==-1) {
@@ -469,7 +472,7 @@ int externalCommand(TokenList* Tokens){
     }else {
         if(pid==0){
             if(execvp(*args,args)<0)
-                perror("Error");
+                perror(Tokens->tokens[0]);
             exit(0);
         }else {
             wait(NULL);
@@ -483,7 +486,7 @@ int changeDirectory(TokenList* Tokens){
     char s[100];
 
     if(Tokens ->tokenNumber>2){
-        printf("Syntax error: Incorrect number of arguments;\n");
+        printf("Syntax error: cd expects one parameter;\n");
         return 1;
     }
 
@@ -497,7 +500,7 @@ int changeDirectory(TokenList* Tokens){
         }
     }else {
         if(chdir(Tokens->tokens[1])!=0){
-            perror("Error");
+            perror(Tokens->tokens[1]);
             return 1;
         }else {
             printf("Current directory: %s\n", getcwd(s, 100));
