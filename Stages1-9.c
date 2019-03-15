@@ -89,7 +89,7 @@ int main()
     HistoryAndAliases HistoryAliases = {0, {{0}}, {{{0},{0}}}, {0}};
     //char cwd[PATH_MAX];
 
-    path = getenv("PATH");
+    path = getenv("PATH"); //original PATH saved as path to restore on exit
     home = getenv("HOME");
 
     //if (getcwd(cwd, sizeof(cwd)) == NULL)
@@ -113,11 +113,11 @@ int main()
 
 
     /*CLEANING*/
-    chdir(getenv("HOME"));
+    chdir(getenv("HOME")); //change current directory to HOME
     save_history(&HistoryAliases);
     saveAliases(&HistoryAliases);
-    setenv("PATH",path,1);
-    path = getenv("PATH");
+    setenv("PATH",path,1); //PATH restored by setting it back to path saved at start of shell
+    path = getenv("PATH"); 
     printf("Restored the PATH to %s\n",path);
     return 0;
 }
@@ -295,7 +295,7 @@ int checkExitCommand(TokenList* Tokens){
 
 int checkGetPath(TokenList* Tokens){
 
-    if(strcmp(Tokens->tokens[0],"getpath")==0)
+    if(strcmp(Tokens->tokens[0],"getpath")==0) 
         return 1;
     else
         return 0;
@@ -410,14 +410,15 @@ int getCommandID(TokenList* Tokens,HistoryAndAliases* HistoryAliases){
     return 100;
 }
 
+//gets the value of the system path and outputs it
 int getpath(TokenList* Tokens){
 
-    if(Tokens->tokenNumber!=1){
+    if(Tokens->tokenNumber!=1){ //if more than one argument inputed display error
         printf("Syntax error: getpath expects no parameters;\n");
         return 1;
     } else {
-        char* path;
-        path = getenv("PATH");
+        char* path; 
+        path = getenv("PATH"); //getenv returns the value of the PATH, path is set to this
         if(path==NULL){
             printf("Error: PATH variable doesn't exist;\n");
             return 0;
@@ -428,13 +429,14 @@ int getpath(TokenList* Tokens){
     }
 }
 
+//sets the system path to the value inputed
 int setpath(TokenList* Tokens){
 
-    if(Tokens->tokenNumber!=2){
+    if(Tokens->tokenNumber!=2){ //if there are not 2 arguments (setpath and a value to change the path to) display error
         printf("Syntax error: setpath expects one parameter;\n");
         return 1;
-    } else {
-        if(setenv("PATH",Tokens->tokens[1],1)==-1) {
+    } else { //setenv sets the environment PATH to the 2nd argument inputed
+        if(setenv("PATH",Tokens->tokens[1],1)==-1) {  //setenv returns -1 on error, so if setting the path returns -1 then error message displayed
             perror("Error: ");
             return 1;
         }
