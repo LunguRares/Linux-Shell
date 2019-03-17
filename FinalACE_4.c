@@ -498,6 +498,8 @@ int externalCommand(TokenList* Tokens){
 
 }
 
+    //Checks if directory user has input is valid and changes accordingly  
+
 int changeDirectory(TokenList* Tokens){
     char s[100];
 
